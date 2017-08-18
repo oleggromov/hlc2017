@@ -30,3 +30,10 @@
 	`CMD` should be present only once:
 
 		https://stackoverflow.com/questions/23692470/why-cant-i-use-docker-cmd-multiple-times-to-run-multiple-services
+
+6. todo
+
+	- import all data
+		- in memory first
+		- choose a in-memory storage
+

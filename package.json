@@ -9,6 +9,7 @@
   "author": "Oleg Gromov <hi@oleggromov.com>",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.15.4"
+    "express": "^4.15.4",
+    "lokijs": "^1.5.0"
   }
 }
