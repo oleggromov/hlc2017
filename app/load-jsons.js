@@ -1,6 +1,6 @@
 const path = require('path')
 const fs = require('fs')
-// const loki = require('lokijs')
+const loki = require('lokijs')
 
 const basedir = __dirname + '/data/'
 
@@ -15,24 +15,33 @@ function getDataFiles (dir) {
 }
 
 function loadJsons (dir) {
-  let data = {}
+  const db = new loki('hlc')
   const files = getDataFiles(dir)
+
+  // TODO add indexes
+  const collections = {
+    users: db.addCollection('users', {
+      unique: ['id']
+    }),
+    locations: db.addCollection('locations', {
+      unique: ['id']
+    }),
+    visits: db.addCollection('visits', {
+      unique: ['id'],
+      indices: ['visited_at']
+    })
+  }
 
   files.forEach(filename => {
     const type = filename.match(/(\w+?)_/)[1]
-    if (!data[type]) {
-      data[type] = []
-    }
-
-    const text = fs.readFileSync(path.resolve(basedir, filename), 'utf8')
-    const parsed = JSON.parse(text)
+    const parsed = JSON.parse(fs.readFileSync(path.resolve(basedir, filename), 'utf8'))
 
     if (parsed[type] && Array.isArray(parsed[type])) {
-      data[type] = data[type].concat(parsed[type])
+      collections[type].insert(parsed[type])
     }
   })
 
-  return data
+  return db
 }
 
 module.exports = loadJsons
