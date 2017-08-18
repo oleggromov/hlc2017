@@ -1,0 +1,14 @@
+{
+  "name": "hlc2017",
+  "version": "1.0.0",
+  "description": "HighLoad Cup 2017",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Oleg Gromov <hi@oleggromov.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.4"
+  }
+}
