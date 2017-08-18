@@ -5,13 +5,13 @@ CMD ["/sbin/my_init"]
 
 # creating directories
 RUN mkdir -p /usr/src/app
-RUN mkdir -p /usr/src/app/data
+RUN mkdir -p /usr/src/app/src/data
 WORKDIR /usr/src/app
 
 # copying app sources
 COPY package.json /usr/src/app
 COPY package-lock.json /usr/src/app
-COPY app /usr/src/app/app
+COPY src/*.js /usr/src/app/src/
 
 # installing node 8.x
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
