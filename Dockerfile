@@ -25,7 +25,7 @@ RUN npm install
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-EXPOSE 3000
+EXPOSE 80
 # Unpack data and run node
-CMD unzip /tmp/data/data.zip -d /usr/src/app/data \
-	&& node app/index.js
+CMD unzip /tmp/data/data.zip -d /usr/src/app/src/data \
+	&& node src/index.js
