@@ -41,7 +41,7 @@ module.exports = function (db) {
       ${where}
       ORDER BY visited_at`)
 
-    if (result.length) {
+    if (result.length && result[0]['AVG(mark)']) {
       res.status(200).send({
         avg: Number(result[0]['AVG(mark)'].toFixed(5))
       })
