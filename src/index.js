@@ -16,6 +16,7 @@ console.log(db.exec('SELECT COUNT(*) FROM visits'))
 app.get('/:collection/:id', require('./get-collection')(db))
 app.get('/users/:id/visits', require('./get-visits')(db))
 app.get('/locations/:id/avg', require('./get-avg')(db))
+app.post('/:collection/new', require('./new-collection')(db))
 
 let port = 80
 if (process.argv.length === 3) {

@@ -1,8 +1,10 @@
 const path = require('path')
 const fs = require('fs')
 const alasql = require('alasql')
+const insertQueries = require('./inserts')
 
 const basedir = __dirname + '/data/'
+
 
 function getDataFiles (dir) {
   const isDataFile = (filename) => {
@@ -49,9 +51,9 @@ function loadJsons (dir) {
   createTables()
 
   const inserts = {
-    users: alasql.compile('INSERT INTO users ($id, $first_name, $last_name, $email, $gender, $birth_date)'),
-    locations: alasql.compile('INSERT INTO locations ($id, $place, $country, $city, $distance)'),
-    visits: alasql.compile('INSERT INTO visits ($id, $location, $user, $visited_at, $mark)')
+    users: alasql.compile(insertQueries.users),
+    locations: alasql.compile(insertQueries.locations),
+    visits: alasql.compile(insertQueries.visits)
   }
 
   files.forEach(filename => {
