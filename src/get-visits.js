@@ -1,11 +1,12 @@
-const stripLokiMeta = require('./strip-loki-meta')
+// const stripLokiMeta = require('./strip-loki-meta')
 
 function stripExtra (result) {
   return result.map(item => {
-    delete item.user
-    delete item.id
-
-    return item
+    return {
+      mark: item.mark,
+      visited_at: item.visited_at,
+      place: item.place
+    }
   })
 }
 
@@ -13,79 +14,44 @@ module.exports = function (db) {
   return function (req, res) {
     console.time('get_visits')
 
-    let filter = {
-      user: Number(req.params.id)
+    let where = ''
+    let join = ''
+
+    if (req.query.fromDate && req.query.toDate) {
+      where += `AND visited_at BETWEEN ${Number(req.query.fromDate) + 1} AND ${Number(req.query.toDate) - 1}\n`
+    } else if (req.query.fromDate) {
+      where += `AND visited_at > ${Number(req.query.fromDate)}\n`
+    } else if (req.query.toDate) {
+      where += `AND visited_at < ${Number(req.query.toDate)}\n`
     }
 
-    // if (req.query.fromDate && req.query.toDate) {
-    //   // TODO is it correct?
-    //   filter.visited_at = { '$between': [Number(req.query.fromDate) + 1, Number(req.query.toDate) - 1] }
-    // } else if (req.query.fromDate) {
-    //   filter.visited_at = { '$gt': Number(req.query.fromDate) }
-    // } else if (req.query.toDate) {
-    //   filter.visited_at = { '$lt': Number(req.query.toDate) }
-    // }
+    if (req.query.country || req.query.toDistance) {
+      join = `INNER JOIN locations AS loc
+        ON visits.location = loc.id`
 
-    // if (req.query.country && req.query.toDistance) {
-    //   const countryBound = db.getCollection('locations').find({
-    //     country: req.query.country,
-    //     distance: { '$lt': Number(req.query.toDistance) }
-    //   })
+      if (req.query.country) {
+        where += `AND loc.country = '${req.query.country}'\n`
+      }
 
-    //   if (countryBound.length) {
-    //     filter.location = { '$in': countryBound.map(location => location.id) }
-    //   } else {
-    //     // TODO is it correct?
-    //     filter.location = { '$in': [-1] }
-    //   }
-    // } else if (req.query.country) {
-    //   const countryBound = db.getCollection('locations')
-    //     .find({ country: req.query.country })
+      if (req.query.toDistance) {
+        where += `AND loc.distance < ${req.query.toDistance} \n`
+      }
+    }
 
-    //   if (countryBound.length) {
-    //     filter.location = { '$in': countryBound.map(location => location.id) }
-    //   } else {
-    //     // TODO is it correct?
-    //     filter.location = { '$in': [-1] }
-    //   }
-    // } else if (req.query.toDistance) {
-    //   const countryBound = db.getCollection('locations')
-    //     .find({ distance: { '$lt': Number(req.query.toDistance) } })
+    const results = db.exec(`SELECT * FROM visits
+      ${join}
+      WHERE user = ${Number(req.params.id)}
+        ${where}
+      ORDER BY visited_at`)
 
-    //   if (countryBound.length) {
-    //     filter.location = { '$in': countryBound.map(location => location.id) }
-    //   } else {
-    //     // TODO is it correct?
-    //     filter.location = { '$in': [-1] }
-    //   }
-    // }
-
-    let visits = db.getCollection('visits')
-      .chain()
-      .find(filter)
-      // .simplesort('visited_at')
-      // .data()
-
-    // if (visits.length) {
-      let locations = db.getCollection('locations').chain()
-      let joined = visits.eqJoin(locations, 'location', 'id')
-
-      console.log(locations)
-      console.log(joined)
-
-      joined = joined
-        .simplesort('visited_at')
-        .data()
-
+    if (results.length) {
       res.status(200).send({
-        // visits: stripLokiMeta(stripExtra(results))
-        visits: stripLokiMeta(joined)
+        visits: stripExtra(results)
       })
-    // } else {
-    //   res.status(404).send()
-    // }
+    } else {
+      res.status(404).send()
+    }
 
     console.timeEnd('get_visits')
   }
 }
-

@@ -1,15 +1,11 @@
-const stripLokiMeta = require('./strip-loki-meta')
-
 module.exports = function (db) {
   return function (req, res) {
     console.time('get_collection')
 
-    let result = db
-      .getCollection(req.params.collection)
-      .by('id', Number(req.params.id))
+    const result = db.exec(`SELECT * FROM ${req.params.collection} WHERE id = ${Number(req.params.id)} LIMIT 1`)
 
-    if (result) {
-      res.status(200).send(stripLokiMeta(result))
+    if (result.length) {
+      res.status(200).send(result[0])
     } else {
       res.status(404).send()
     }

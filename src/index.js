@@ -9,9 +9,9 @@ const db = loadJsons(path.resolve(__dirname, './data'))
 console.timeEnd('load_data_time')
 
 console.log('Loaded:')
-console.log(`${db.getCollection('users').count()} users`)
-console.log(`${db.getCollection('locations').count()} locations`)
-console.log(`${db.getCollection('visits').count()} visits`)
+console.log(db.exec('SELECT COUNT(*) FROM users'))
+console.log(db.exec('SELECT COUNT(*) FROM locations'))
+console.log(db.exec('SELECT COUNT(*) FROM visits'))
 
 app.get('/:collection/:id', require('./get-collection')(db))
 app.get('/users/:id/visits', require('./get-visits')(db))
