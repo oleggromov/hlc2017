@@ -37,3 +37,14 @@
 		- in memory first
 		- choose a in-memory storage
 
+7. LokiJS
+
+		https://rawgit.com/techfort/LokiJS/master/jsdoc/Loki.html
+
+	It's a rather lightweight MongoDB clone
+
+8. It's annoying to implement joins without a relational database so I decided to try in-memory SQL
+
+		https://github.com/agershun/alasql
+
+	According to the first measurements, it's about 10 times slower than LokiJS. Maybe I'll have to switch back to by-hand collection manipulation
