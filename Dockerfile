@@ -28,4 +28,5 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 EXPOSE 80
 # Unpack data and run node
 CMD unzip /tmp/data/data.zip -d /usr/src/app/src/data \
+	&& cp /tmp/data/options.txt /usr/src/app/src/data \
 	&& node src/index.js
