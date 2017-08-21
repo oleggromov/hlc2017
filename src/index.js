@@ -15,9 +15,9 @@ console.log(`${db.getCollection('visits').count()} visits`)
 
 app.get('/:collection/:id', require('./get-collection')(db))
 app.get('/users/:id/visits', require('./get-visits')(db))
-app.get('/locations/:id/avg', require('./get-avg')(db))
+app.get('/locations/:id/avg', require('./get-avg')(db, db.getCollection('timestamp').find()[0].timestamp))
 
-let port = 80
+let port = 3000
 if (process.argv.length === 3) {
   port = Number(process.argv[2])
 }

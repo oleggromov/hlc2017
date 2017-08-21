@@ -1,89 +1,65 @@
 const stripLokiMeta = require('./strip-loki-meta')
-
-function stripExtra (result) {
-  return result.map(item => {
-    delete item.user
-    delete item.id
-
-    return item
-  })
-}
+const innerJoin = require('./inner-join')
+const getVisitedFilter = require('./get-visited-filter')
 
 module.exports = function (db) {
   return function (req, res) {
     console.time('get_visits')
 
-    let filter = {
+    let visitsFilter = {
       user: Number(req.params.id)
     }
 
-    // if (req.query.fromDate && req.query.toDate) {
-    //   // TODO is it correct?
-    //   filter.visited_at = { '$between': [Number(req.query.fromDate) + 1, Number(req.query.toDate) - 1] }
-    // } else if (req.query.fromDate) {
-    //   filter.visited_at = { '$gt': Number(req.query.fromDate) }
-    // } else if (req.query.toDate) {
-    //   filter.visited_at = { '$lt': Number(req.query.toDate) }
-    // }
+    // console.time('   users')
+    if (!db.getCollection('users').find({ id: Number(req.params.id) }).length) {
+      res.status(404).send()
+      return
+    }
+    // console.timeEnd('   users')
 
-    // if (req.query.country && req.query.toDistance) {
-    //   const countryBound = db.getCollection('locations').find({
-    //     country: req.query.country,
-    //     distance: { '$lt': Number(req.query.toDistance) }
-    //   })
+    const visitedAd = getVisitedFilter(req)
+    if (visitedAd) {
+      visitsFilter.visited_at = visitedAd
+    }
 
-    //   if (countryBound.length) {
-    //     filter.location = { '$in': countryBound.map(location => location.id) }
-    //   } else {
-    //     // TODO is it correct?
-    //     filter.location = { '$in': [-1] }
-    //   }
-    // } else if (req.query.country) {
-    //   const countryBound = db.getCollection('locations')
-    //     .find({ country: req.query.country })
+    // console.time('   visits')
+    const visits = db.getCollection('visits').find(visitsFilter)
+    // console.timeEnd('   visits')
 
-    //   if (countryBound.length) {
-    //     filter.location = { '$in': countryBound.map(location => location.id) }
-    //   } else {
-    //     // TODO is it correct?
-    //     filter.location = { '$in': [-1] }
-    //   }
-    // } else if (req.query.toDistance) {
-    //   const countryBound = db.getCollection('locations')
-    //     .find({ distance: { '$lt': Number(req.query.toDistance) } })
+    let locationsFilter = {
+      id: { '$in': visits.map(visit => visit.location) }
+    }
 
-    //   if (countryBound.length) {
-    //     filter.location = { '$in': countryBound.map(location => location.id) }
-    //   } else {
-    //     // TODO is it correct?
-    //     filter.location = { '$in': [-1] }
-    //   }
-    // }
+    if (req.query.country) {
+      locationsFilter.country = req.query.country
+    }
+    if (req.query.toDistance) {
+      locationsFilter.distance = { '$lt': Number(req.query.toDistance) }
+    }
 
-    let visits = db.getCollection('visits')
-      .chain()
-      .find(filter)
-      // .simplesort('visited_at')
-      // .data()
+    // console.time('   locations')
+    const locations = db.getCollection('locations').find(locationsFilter)
+    // console.timeEnd('   locations')
 
-    // if (visits.length) {
-      let locations = db.getCollection('locations').chain()
-      let joined = visits.eqJoin(locations, 'location', 'id')
+    // console.time('   join')
+    let joined = innerJoin(visits, locations, 'location', 'id')
+    // console.timeEnd('   join')
 
-      console.log(locations)
-      console.log(joined)
+    // console.time('   map')
+    if (joined.length) {
+      joined = joined.map(item => ({
+        mark: item.mark,
+        visited_at: item.visited_at,
+        place: item.place
+      })).sort((a, b) => a.visited_at - b.visited_at)
+    }
+    // console.timeEnd('   map')
 
-      joined = joined
-        .simplesort('visited_at')
-        .data()
-
-      res.status(200).send({
-        // visits: stripLokiMeta(stripExtra(results))
-        visits: stripLokiMeta(joined)
-      })
-    // } else {
-    //   res.status(404).send()
-    // }
+    // console.time('   result')
+    res.status(200).send({
+      visits: joined
+    })
+    // console.timeEnd('   result')
 
     console.timeEnd('get_visits')
   }

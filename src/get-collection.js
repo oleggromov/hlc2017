@@ -6,10 +6,10 @@ module.exports = function (db) {
 
     let result = db
       .getCollection(req.params.collection)
-      .by('id', Number(req.params.id))
+      .find({ id: Number(req.params.id) })
 
-    if (result) {
-      res.status(200).send(stripLokiMeta(result))
+    if (result.length) {
+      res.status(200).send(stripLokiMeta(result[0]))
     } else {
       res.status(404).send()
     }
