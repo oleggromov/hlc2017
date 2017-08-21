@@ -26,9 +26,9 @@ module.exports = function (DEBUG, db) {
     }
     log.timeEnd(DEBUG, '   validParams')
 
-    const visitedAd = getVisitedFilter(req)
-    if (visitedAd) {
-      visitsFilter.visited_at = visitedAd
+    const visitedAt = getVisitedFilter(req)
+    if (visitedAt) {
+      visitsFilter.visited_at = visitedAt
     }
 
     log.time(DEBUG, '   visits')

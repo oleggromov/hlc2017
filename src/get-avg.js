@@ -25,35 +25,38 @@ module.exports = function (DEBUG, db, timestamp) {
   return function (req, res) {
     log.time(DEBUG, 'get_avg')
 
-    // log.time(DEBUG, '   locations')
+    log.time(DEBUG, '    get_avg_location_exists')
     if (!db.getCollection('locations').find({ id: Number(req.params.id) }).length) {
       res.status(404).send()
       return
     }
-    // log.timeEnd(DEBUG, '   locations')
+    log.timeEnd(DEBUG, '    get_avg_location_exists')
 
-    // log.time(DEBUG, '   validParams')
+    log.time(DEBUG, '    get_avg_params_valid')
     if (!queryParamsAreValid(req.query, ['gender', 'toDate', 'fromDate', 'fromAge', 'toAge'])) {
       res.status(400).send()
       return
     }
-    // log.timeEnd(DEBUG, '   validParams')
+    log.timeEnd(DEBUG, '    get_avg_params_valid')
 
     let visitsFilter = {
       location: Number(req.params.id)
     }
 
+    log.time(DEBUG, '    get_avg_visits')
     const visitedAd = getVisitedFilter(req)
     if (visitedAd) {
       visitsFilter.visited_at = visitedAd
     }
 
     const visits = db.getCollection('visits').find(visitsFilter)
+    log.timeEnd(DEBUG, '    get_avg_visits')
 
     let usersFilter = {
       id: { '$in': visits.map(visit => visit.user) }
     }
 
+    log.time(DEBUG, '    get_avg_users')
     const ageFilter = getAgeFilter(req, timestamp)
     if (ageFilter) {
       usersFilter.birth_date = ageFilter
@@ -63,9 +66,14 @@ module.exports = function (DEBUG, db, timestamp) {
     }
 
     const users = db.getCollection('users').find(usersFilter)
+    log.timeEnd(DEBUG, '    get_avg_users')
 
+
+    log.time(DEBUG, '    get_avg_join')
     let joined = innerJoin(visits, users, 'user', 'id')
+    log.timeEnd(DEBUG, '    get_avg_join')
 
+    log.time(DEBUG, '    get_avg_result')
     if (joined.length) {
       res.status(200).send({
         avg: Number((joined.reduce((acc, cur) => {
@@ -77,6 +85,7 @@ module.exports = function (DEBUG, db, timestamp) {
         avg: 0
       })
     }
+    log.timeEnd(DEBUG, '    get_avg_result')
 
     log.timeEnd(DEBUG, 'get_avg')
   }

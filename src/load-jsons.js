@@ -49,10 +49,13 @@ function loadJsons (dir) {
 
   console.time('build indexes')
   collections['users'].ensureIndex('id', true)
+  collections['users'].ensureIndex('birth_date', true)
   collections['locations'].ensureIndex('id', true)
   collections['locations'].ensureIndex('country', true)
   collections['locations'].ensureIndex('distance', true)
   collections['visits'].ensureIndex('id', true)
+  collections['visits'].ensureIndex('user', true)
+  collections['visits'].ensureIndex('location', true)
   collections['visits'].ensureIndex('visited_at', true)
   console.timeEnd('build indexes')
 
