@@ -1,10 +1,11 @@
 const stripLokiMeta = require('./strip-loki-meta')
 const innerJoin = require('./inner-join')
 const getVisitedFilter = require('./get-visited-filter')
+const queryParamsAreValid = require('./query-params-are-valid')
 
 module.exports = function (db) {
   return function (req, res) {
-    console.time('get_visits')
+    // console.time('get_visits')
 
     let visitsFilter = {
       user: Number(req.params.id)
@@ -16,6 +17,13 @@ module.exports = function (db) {
       return
     }
     // console.timeEnd('   users')
+
+    // console.time('   validParams')
+    if (!queryParamsAreValid(req.query, ['toDistance', 'toDate', 'fromDate'])) {
+      res.status(400).send()
+      return
+    }
+    // console.timeEnd('   validParams')
 
     const visitedAd = getVisitedFilter(req)
     if (visitedAd) {
@@ -61,7 +69,7 @@ module.exports = function (db) {
     })
     // console.timeEnd('   result')
 
-    console.timeEnd('get_visits')
+    // console.timeEnd('get_visits')
   }
 }
 
