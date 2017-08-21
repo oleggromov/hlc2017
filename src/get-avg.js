@@ -1,6 +1,7 @@
 const getVisitedFilter = require('./get-visited-filter')
 const innerJoin = require('./inner-join')
 const queryParamsAreValid = require('./query-params-are-valid')
+const log = require('./log')
 
 function getAgeTimestamp (age, now) {
   return Math.round(now - (age * 365.24 * 24 * 60 * 60))
@@ -20,23 +21,23 @@ function getAgeFilter (req, timestamp) {
   return filter
 }
 
-module.exports = function (db, timestamp) {
+module.exports = function (DEBUG, db, timestamp) {
   return function (req, res) {
-    // console.time('get_avg')
+    log.time(DEBUG, 'get_avg')
 
-    // console.time('   locations')
+    // log.time(DEBUG, '   locations')
     if (!db.getCollection('locations').find({ id: Number(req.params.id) }).length) {
       res.status(404).send()
       return
     }
-    // console.timeEnd('   locations')
+    // log.timeEnd(DEBUG, '   locations')
 
-    // console.time('   validParams')
+    // log.time(DEBUG, '   validParams')
     if (!queryParamsAreValid(req.query, ['gender', 'toDate', 'fromDate', 'fromAge', 'toAge'])) {
       res.status(400).send()
       return
     }
-    // console.timeEnd('   validParams')
+    // log.timeEnd(DEBUG, '   validParams')
 
     let visitsFilter = {
       location: Number(req.params.id)
@@ -77,18 +78,6 @@ module.exports = function (db, timestamp) {
       })
     }
 
-    // if (visits.length) {
-    //   const avg = visits.reduce((acc, location) => {
-    //     return acc + location.mark
-    //   }, 0) / visits.length
-
-    //   res.status(200).send({
-    //     avg: Number(avg.toFixed(5))
-    //   })
-    // } else {
-    //   res.status(200).send({ avg: 0.0 })
-    // }
-
-    // console.timeEnd('get_avg')
+    log.timeEnd(DEBUG, 'get_avg')
   }
 }

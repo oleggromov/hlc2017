@@ -2,37 +2,38 @@ const stripLokiMeta = require('./strip-loki-meta')
 const innerJoin = require('./inner-join')
 const getVisitedFilter = require('./get-visited-filter')
 const queryParamsAreValid = require('./query-params-are-valid')
+const log = require('./log')
 
-module.exports = function (db) {
+module.exports = function (DEBUG, db) {
   return function (req, res) {
-    // console.time('get_visits')
+    log.time(DEBUG, 'get_visits')
 
     let visitsFilter = {
       user: Number(req.params.id)
     }
 
-    // console.time('   users')
+    log.time(DEBUG, '   users')
     if (!db.getCollection('users').find({ id: Number(req.params.id) }).length) {
       res.status(404).send()
       return
     }
-    // console.timeEnd('   users')
+    log.timeEnd(DEBUG, '   users')
 
-    // console.time('   validParams')
+    log.time(DEBUG, '   validParams')
     if (!queryParamsAreValid(req.query, ['toDistance', 'toDate', 'fromDate'])) {
       res.status(400).send()
       return
     }
-    // console.timeEnd('   validParams')
+    log.timeEnd(DEBUG, '   validParams')
 
     const visitedAd = getVisitedFilter(req)
     if (visitedAd) {
       visitsFilter.visited_at = visitedAd
     }
 
-    // console.time('   visits')
+    log.time(DEBUG, '   visits')
     const visits = db.getCollection('visits').find(visitsFilter)
-    // console.timeEnd('   visits')
+    log.timeEnd(DEBUG, '   visits')
 
     let locationsFilter = {
       id: { '$in': visits.map(visit => visit.location) }
@@ -45,15 +46,15 @@ module.exports = function (db) {
       locationsFilter.distance = { '$lt': Number(req.query.toDistance) }
     }
 
-    // console.time('   locations')
+    log.time(DEBUG, '   locations')
     const locations = db.getCollection('locations').find(locationsFilter)
-    // console.timeEnd('   locations')
+    log.timeEnd(DEBUG, '   locations')
 
-    // console.time('   join')
+    log.time(DEBUG, '   join')
     let joined = innerJoin(visits, locations, 'location', 'id')
-    // console.timeEnd('   join')
+    log.timeEnd(DEBUG, '   join')
 
-    // console.time('   map')
+    log.time(DEBUG, '   map')
     if (joined.length) {
       joined = joined.map(item => ({
         mark: item.mark,
@@ -61,15 +62,15 @@ module.exports = function (db) {
         place: item.place
       })).sort((a, b) => a.visited_at - b.visited_at)
     }
-    // console.timeEnd('   map')
+    log.timeEnd(DEBUG, '   map')
 
-    // console.time('   result')
+    log.time(DEBUG, '   result')
     res.status(200).send({
       visits: joined
     })
-    // console.timeEnd('   result')
+    log.timeEnd(DEBUG, '   result')
 
-    // console.timeEnd('get_visits')
+    log.timeEnd(DEBUG, 'get_visits')
   }
 }
 
