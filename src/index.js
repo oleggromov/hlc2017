@@ -1,4 +1,9 @@
-const DEBUG = process.argv[2] === 'debug'
+const DEBUG = process.env.NODE_ENV !== 'production'
+if (DEBUG) {
+  console.warn('Running in DEBUG mode')
+} else {
+  console.log('NODE_ENV === production')
+}
 
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -19,6 +24,10 @@ console.log(`${db.getCollection('users').count()} users`)
 console.log(`${db.getCollection('locations').count()} locations`)
 console.log(`${db.getCollection('visits').count()} visits`)
 
+// app.use((req, res, next) => {
+//   req._start = process.hrtime()
+// })
+
 app.get('/:collection/:id', require('./get-collection')(DEBUG, db))
 app.get('/users/:id/visits', require('./get-visits')(DEBUG, db))
 app.get('/locations/:id/avg', require('./get-avg')(DEBUG, db, db.getCollection('timestamp').find()[0].timestamp))
@@ -27,8 +36,8 @@ app.post('/:collection/new', bodyParser.json(), require('./post-collection')(DEB
 app.post('/:collection/:id', bodyParser.json(), require('./post-collection-update')(DEBUG, db))
 
 let port = 80
-if (process.argv.length === 4) {
-  port = Number(process.argv[3])
+if (process.argv.length === 3) {
+  port = Number(process.argv[2])
 }
 
 app.listen(port, function () {
