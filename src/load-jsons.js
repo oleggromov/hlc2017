@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const loki = require('lokijs')
+const storage = require('./storage')
 
 const basedir = __dirname + '/data/'
 
@@ -20,9 +21,11 @@ function loadJsons (dir) {
 
   // TODO add indexes
   const collections = {
-    users: db.addCollection('users'),
-    locations: db.addCollection('locations'),
-    visits: db.addCollection('visits'),
+    users: storage.addCollection('users'),
+    locations: storage.addCollection('locations'),
+    visits: storage.addCollection('visits'),
+
+
     timestamp: db.addCollection('timestamp')
   }
 
@@ -49,18 +52,18 @@ function loadJsons (dir) {
 
   console.time('build indexes')
   collections['users'].ensureIndex('id', true)
-  collections['users'].ensureIndex('birth_date', true)
-  collections['users'].ensureIndex('gender', true)
+  // collections['users'].ensureIndex('birth_date', true)
+  // collections['users'].ensureIndex('gender', true)
   collections['locations'].ensureIndex('id', true)
-  collections['locations'].ensureIndex('country', true)
-  collections['locations'].ensureIndex('distance', true)
+  // collections['locations'].ensureIndex('country', true)
+  // collections['locations'].ensureIndex('distance', true)
   collections['visits'].ensureIndex('id', true)
-  collections['visits'].ensureIndex('user', true)
-  collections['visits'].ensureIndex('location', true)
-  collections['visits'].ensureIndex('visited_at', true)
+  // collections['visits'].ensureIndex('user', true)
+  // collections['visits'].ensureIndex('location', true)
+  // collections['visits'].ensureIndex('visited_at', true)
   console.timeEnd('build indexes')
 
-  return db
+  return storage
 }
 
 module.exports = loadJsons

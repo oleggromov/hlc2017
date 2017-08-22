@@ -1,4 +1,3 @@
-const stripLokiMeta = require('./strip-loki-meta')
 const log = require('./log')
 
 module.exports = function (DEBUG, db) {
@@ -12,8 +11,8 @@ module.exports = function (DEBUG, db) {
     log.timeEnd(DEBUG, '    get_collection_getCollection')
 
     log.time(DEBUG, '    get_collection_send')
-    if (result.length) {
-      res.status(200).send(stripLokiMeta(result[0]))
+    if (result) {
+      res.status(200).send(result)
     } else {
       res.status(404).send()
     }

@@ -29,11 +29,11 @@ console.log(`${db.getCollection('visits').count()} visits`)
 // })
 
 app.get('/:collection/:id', require('./get-collection')(DEBUG, db))
-app.get('/users/:id/visits', require('./get-visits')(DEBUG, db))
-app.get('/locations/:id/avg', require('./get-avg')(DEBUG, db, db.getCollection('timestamp').find()[0].timestamp))
+// app.get('/users/:id/visits', require('./get-visits')(DEBUG, db))
+// app.get('/locations/:id/avg', require('./get-avg')(DEBUG, db, db.getCollection('timestamp').find()[0].timestamp))
 
-app.post('/:collection/new', bodyParser.json(), require('./post-collection')(DEBUG, db))
-app.post('/:collection/:id', bodyParser.json(), require('./post-collection-update')(DEBUG, db))
+// app.post('/:collection/new', bodyParser.json(), require('./post-collection')(DEBUG, db))
+// app.post('/:collection/:id', bodyParser.json(), require('./post-collection-update')(DEBUG, db))
 
 let port = 80
 if (process.argv.length === 3) {
