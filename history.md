@@ -51,7 +51,25 @@
 
 9. implemented everything in LokiJS
 
-	- Rather complex aggregated requsts are slow because of bad or non-existent binary search indices. Look to
+	- Rather complex aggregated requsts are slow because of bad or non-existent binary search indices
 	- posts work rather well
 
 	TODO: think about how to recalculate indices.
+
+10. Profiling
+
+		https://gist.github.com/oleggromov/49c001d6f50f7b96c957cfc96da4c2d5
+
+	Profiling showed that most of the time goes to LokiJS but I don't understand how to separate initial indexes building from the actual app runtime.
+
+11. Found that it's an anti-pattern to leave synchronous functions in production for answering requests
+
+		http://expressjs.com/en/advanced/best-practice-performance.html
+
+	My app doesn't use any IO except actual HTTP req/res handling. Wrapping answer functions into setTimeout(..., 0) dropped RPS from 1400+ to ~450.
+
+12. Reading the profiling results
+
+		https://stackoverflow.com/questions/23934451/how-to-read-nodejs-internal-profiler-tick-processor-output
+
+		https://groups.google.com/forum/#!topic/nodejs/oRbX5eZvOPg
