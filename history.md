@@ -79,3 +79,14 @@
 	There's no significant difference: 2278 (hand-built array) vs 2223 (hand-built object) vs 2165 (loki) rps.
 
 	The problem is, after a few sequential round of requests service stops answering by timeout (-1).
+
+14. Found issues with update
+
+	First, I used incorrect way of updating without notifying the collection. Correct one is:
+
+		// modify original object
+		obj.prop = 123
+		// notify the collection
+		collection.update(obj)
+
+	Second, I used `strip-loki-meta` that changed original objects.
