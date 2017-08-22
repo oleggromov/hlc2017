@@ -73,3 +73,9 @@
 		https://stackoverflow.com/questions/23934451/how-to-read-nodejs-internal-profiler-tick-processor-output
 
 		https://groups.google.com/forum/#!topic/nodejs/oRbX5eZvOPg
+
+13. Built getById indexes on array/object
+
+	There's no significant difference: 2278 (hand-built array) vs 2223 (hand-built object) vs 2165 (loki) rps.
+
+	The problem is, after a few sequential round of requests service stops answering by timeout (-1).
