@@ -1,5 +1,5 @@
 function strip (item) {
-  let modified = item
+  let modified = Object.assign({}, item)
 
   delete modified['meta']
   delete modified['$loki']

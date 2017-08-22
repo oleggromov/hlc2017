@@ -24,10 +24,6 @@ console.log(`${db.getCollection('users').count()} users`)
 console.log(`${db.getCollection('locations').count()} locations`)
 console.log(`${db.getCollection('visits').count()} visits`)
 
-// app.use((req, res, next) => {
-//   req._start = process.hrtime()
-// })
-
 app.get('/:collection/:id', require('./get-collection')(DEBUG, db))
 app.get('/users/:id/visits', require('./get-visits')(DEBUG, db))
 app.get('/locations/:id/avg', require('./get-avg')(DEBUG, db, db.getCollection('timestamp').find()[0].timestamp))

@@ -4,9 +4,12 @@ const log = require('./log')
 module.exports = function (DEBUG, db) {
   return function (req, res) {
     log.time(DEBUG, 'update_collection')
+    log.log(DEBUG, req.originalUrl, JSON.stringify(req.body))
+
+    const collection = db.getCollection(req.params.collection)
 
     log.time(DEBUG, '    update_collection_exists')
-    let source = db.getCollection(req.params.collection).findOne({ id: Number(req.params.id) })
+    let source = collection.findOne({ id: Number(req.params.id) })
 
     if (!source) {
       res.status(404).send()
@@ -23,6 +26,7 @@ module.exports = function (DEBUG, db) {
 
     log.time(DEBUG, '    update_collection_changeProps')
     Object.assign(source, req.body)
+    collection.update(source)
     log.timeEnd(DEBUG, '    update_collection_changeProps')
 
     log.time(DEBUG, '    update_collection_result')
