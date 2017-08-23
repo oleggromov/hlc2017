@@ -1,0 +1,16 @@
+$ ./start-all.sh
+bullets count: 6000
+Start test run
+Done. 6000 queries in 2422 ms => 2477 rps
+Check the answers...
+All answers is OK
+bullets count: 12000
+Start test run
+Done. 12000 queries in 38059 ms => 315 rps
+Check the answers...
+All answers is OK
+bullets count: 42000
+Start test run
+Done. 42000 queries in 13780 ms => 3048 rps
+Check the answers...
+All answers is OK

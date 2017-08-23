@@ -1,0 +1,6 @@
+./highloadcup_tester -addr http://127.0.0.1:3000 -hlcupdocs ~/home_projects/hlcupdocs/data/FULL/ -test -phase 4
+bullets count: 4609
+Start test run
+Done. 4609 queries in 2129 ms => 2165 rps
+Check the answers...
+All answers is OK
