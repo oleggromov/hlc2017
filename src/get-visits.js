@@ -12,28 +12,28 @@ module.exports = function (DEBUG, db) {
       user: Number(req.params.id)
     }
 
-    log.time(DEBUG, '   users')
+    log.time(DEBUG, '    get_visits_users')
     if (!db.getCollection('users').find({ id: Number(req.params.id) }).length) {
       res.status(404).send()
       return
     }
-    log.timeEnd(DEBUG, '   users')
+    log.timeEnd(DEBUG, '    get_visits_users')
 
-    log.time(DEBUG, '   validParams')
+    log.time(DEBUG, '    get_visits_validParams')
     if (!queryParamsAreValid(req.query, ['toDistance', 'toDate', 'fromDate'])) {
       res.status(400).send()
       return
     }
-    log.timeEnd(DEBUG, '   validParams')
+    log.timeEnd(DEBUG, '    get_visits_validParams')
 
     const visitedAt = getVisitedFilter(req)
     if (visitedAt) {
       visitsFilter.visited_at = visitedAt
     }
 
-    log.time(DEBUG, '   visits')
+    log.time(DEBUG, '    get_visits_visits')
     const visits = db.getCollection('visits').find(visitsFilter)
-    log.timeEnd(DEBUG, '   visits')
+    log.timeEnd(DEBUG, '    get_visits_visits')
 
     let locationsFilter = {
       id: { '$in': visits.map(visit => visit.location) }
@@ -46,15 +46,15 @@ module.exports = function (DEBUG, db) {
       locationsFilter.distance = { '$lt': Number(req.query.toDistance) }
     }
 
-    log.time(DEBUG, '   locations')
+    log.time(DEBUG, '    get_visits_locations')
     const locations = db.getCollection('locations').find(locationsFilter)
-    log.timeEnd(DEBUG, '   locations')
+    log.timeEnd(DEBUG, '    get_visits_locations')
 
-    log.time(DEBUG, '   join')
+    log.time(DEBUG, '    get_visits_join')
     let joined = innerJoin(visits, locations, 'location', 'id')
-    log.timeEnd(DEBUG, '   join')
+    log.timeEnd(DEBUG, '    get_visits_join')
 
-    log.time(DEBUG, '   map')
+    log.time(DEBUG, '    get_visits_map')
     if (joined.length) {
       joined = joined.map(item => ({
         mark: item.mark,
@@ -62,13 +62,13 @@ module.exports = function (DEBUG, db) {
         place: item.place
       })).sort((a, b) => a.visited_at - b.visited_at)
     }
-    log.timeEnd(DEBUG, '   map')
+    log.timeEnd(DEBUG, '    get_visits_map')
 
-    log.time(DEBUG, '   result')
+    log.time(DEBUG, '    get_visits_result')
     res.status(200).send({
       visits: joined
     })
-    log.timeEnd(DEBUG, '   result')
+    log.timeEnd(DEBUG, '    get_visits_result')
 
     log.timeEnd(DEBUG, 'get_visits')
   }
