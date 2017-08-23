@@ -8,7 +8,7 @@ const numbers = {
 
 function queryParamsAreValid (reqQuery, paramsList) {
   for (param of paramsList) {
-  	if (numbers[param] && reqQuery[param] && isNaN(Number(reqQuery[param]))) {
+  	if (numbers[param] && typeof reqQuery[param] !== 'undefined' && isNaN(Number(reqQuery[param]))) {
   		return false
   	}
   }

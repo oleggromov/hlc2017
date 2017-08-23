@@ -1,21 +1,41 @@
+const resMethods = require('./res-methods')
 const stripLokiMeta = require('./strip-loki-meta')
 const log = require('./log')
 
+const getParams = (match) => {
+  const collection = match[1]
+  const id = Number(match[2])
+
+  return {
+    collection,
+    id
+  }
+}
+
 module.exports = function (DEBUG, db) {
-  return function (req, res) {
+  return (match, req, res) => {
     log.time(DEBUG, 'get_collection')
 
+    log.time(DEBUG, '    get_collection_parseUrl')
+    const { collection, id } = getParams(match)
+    log.timeEnd(DEBUG, '    get_collection_parseUrl')
+
+    if (isNaN(id)) {
+      log.time(DEBUG, '    get_collection_send_notFound')
+      resMethods.sendNotFound(req, res)
+      log.timeEnd(DEBUG, '    get_collection_send_notFound')
+      return
+    }
+
     log.time(DEBUG, '    get_collection_getCollection')
-    let result = db
-      .getCollection(req.params.collection)
-      .find({ id: Number(req.params.id) })
+    const result = db.getCollection(collection).find({ id })
     log.timeEnd(DEBUG, '    get_collection_getCollection')
 
     log.time(DEBUG, '    get_collection_send')
     if (result.length) {
-      res.status(200).send(stripLokiMeta(result[0]))
+      resMethods.sendResult(stripLokiMeta(result[0]), req, res)
     } else {
-      res.status(404).send()
+      resMethods.sendNotFound(req, res)
     }
     log.timeEnd(DEBUG, '    get_collection_send')
 

@@ -1,13 +1,13 @@
-function getVisitedFilter (req) {
+function getVisitedFilter (queryParams) {
   let filter
 
-  if (req.query.fromDate && req.query.toDate) {
+  if (queryParams.fromDate && queryParams.toDate) {
     // TODO is it correct?
-    filter = { '$between': [Number(req.query.fromDate) + 1, Number(req.query.toDate) - 1] }
-  } else if (req.query.fromDate) {
-    filter = { '$gt': Number(req.query.fromDate) }
-  } else if (req.query.toDate) {
-    filter = { '$lt': Number(req.query.toDate) }
+    filter = { '$between': [queryParams.fromDate + 1, queryParams.toDate - 1] }
+  } else if (queryParams.fromDate) {
+    filter = { '$gt': queryParams.fromDate }
+  } else if (queryParams.toDate) {
+    filter = { '$lt': queryParams.toDate }
   }
 
   return filter

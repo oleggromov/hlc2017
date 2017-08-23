@@ -3,30 +3,64 @@ const innerJoin = require('./inner-join')
 const getVisitedFilter = require('./get-visited-filter')
 const queryParamsAreValid = require('./query-params-are-valid')
 const log = require('./log')
+const resMethods = require('./res-methods')
+const getQueryParams = require('./get-query-params')
+
+const getParams = (match, url) => {
+  let params = {
+    userId: Number(match[1]),
+    query: {}
+  }
+
+  const queryParams = getQueryParams(url)
+  if (queryParams) {
+    if (queryParams.toDistance) {
+      params.query.toDistance = Number(queryParams.toDistance)
+    }
+
+    if (queryParams.fromDate) {
+      params.query.fromDate = Number(queryParams.fromDate)
+    }
+
+    if (queryParams.toDate) {
+      params.query.toDate = Number(queryParams.toDate)
+    }
+
+    if (queryParams.country) {
+      params.query.country = queryParams.country
+    }
+  }
+
+  return params
+}
 
 module.exports = function (DEBUG, db) {
-  return function (req, res) {
+  return function (match, req, res) {
     log.time(DEBUG, 'get_visits')
 
+    log.time(DEBUG, '    get_visits_parseUrl')
+    const params = getParams(match, req.url)
+    log.timeEnd(DEBUG, '    get_visits_parseUrl')
+
     let visitsFilter = {
-      user: Number(req.params.id)
+      user: params.userId
     }
 
     log.time(DEBUG, '    get_visits_users')
-    if (!db.getCollection('users').find({ id: Number(req.params.id) }).length) {
-      res.status(404).send()
+    if (!db.getCollection('users').find({ id: params.userId }).length) {
+      resMethods.sendNotFound(req, res)
       return
     }
     log.timeEnd(DEBUG, '    get_visits_users')
 
     log.time(DEBUG, '    get_visits_validParams')
-    if (!queryParamsAreValid(req.query, ['toDistance', 'toDate', 'fromDate'])) {
-      res.status(400).send()
+    if (!queryParamsAreValid(params.query, ['toDistance', 'toDate', 'fromDate'])) {
+      resMethods.sendBadRequest(req, res)
       return
     }
     log.timeEnd(DEBUG, '    get_visits_validParams')
 
-    const visitedAt = getVisitedFilter(req)
+    const visitedAt = getVisitedFilter(params.query)
     if (visitedAt) {
       visitsFilter.visited_at = visitedAt
     }
@@ -39,11 +73,11 @@ module.exports = function (DEBUG, db) {
       id: { '$in': visits.map(visit => visit.location) }
     }
 
-    if (req.query.country) {
-      locationsFilter.country = req.query.country
+    if (params.query.country) {
+      locationsFilter.country = params.query.country
     }
-    if (req.query.toDistance) {
-      locationsFilter.distance = { '$lt': Number(req.query.toDistance) }
+    if (params.query.toDistance) {
+      locationsFilter.distance = { '$lt': params.query.toDistance }
     }
 
     log.time(DEBUG, '    get_visits_locations')
@@ -65,9 +99,9 @@ module.exports = function (DEBUG, db) {
     log.timeEnd(DEBUG, '    get_visits_map')
 
     log.time(DEBUG, '    get_visits_result')
-    res.status(200).send({
+    resMethods.sendResult({
       visits: joined
-    })
+    }, req, res)
     log.timeEnd(DEBUG, '    get_visits_result')
 
     log.timeEnd(DEBUG, 'get_visits')
