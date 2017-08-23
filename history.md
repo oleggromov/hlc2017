@@ -100,6 +100,17 @@
 
 16. Replaced express on get-handlers
 
+  From:
+
+    $ ./highloadcup_tester -addr http://127.0.0.1:3000 -hlcupdocs ~/home_projects/hlcupdocs/data/FULL/ -test -phase 1
+    bullets count: 6000
+    Start test run
+    Done. 6000 queries in 1514 ms => 3963 rps
+    Check the answers...
+    All answers is OK
+
+  To:
+
     $ ./highloadcup_tester -addr http://127.0.0.1:3000 -hlcupdocs ~/home_projects/hlcupdocs/data/FULL/ -test -phase 1
     bullets count: 6000
     Start test run
