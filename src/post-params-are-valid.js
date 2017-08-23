@@ -1,5 +1,9 @@
 const isNumber = (param) => {
-  return Boolean(param) && !isNaN(Number(param))
+  return Boolean(param) && typeof param === 'number' && !isNaN(Number(param))
+}
+
+const isString = (param) => {
+  return typeof param === 'string'
 }
 
 const notNull = (param) => {
@@ -8,26 +12,26 @@ const notNull = (param) => {
 
 const validation = {
   visits: {
+    id: isNumber,
     user: isNumber,
     location: isNumber,
     visited_at: isNumber,
-    id: isNumber,
     mark: isNumber
   },
   locations: {
-    distance: isNumber,
     id: isNumber,
-    city: notNull,
-    place: notNull,
-    country: notNull
+    distance: isNumber,
+    city: isString,
+    place: isString,
+    country: isString
   },
   users: {
-    birth_date: isNumber,
     id: isNumber,
+    birth_date: isNumber,
     first_name: notNull,
     last_name: notNull,
     gender: notNull,
-    email: notNull
+    email: isString
   }
 }
 

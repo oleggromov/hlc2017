@@ -1,7 +1,7 @@
 module.exports = {
-  log: (DEBUG, msg) => {
+  log: (DEBUG, ...args) => {
     if (DEBUG) {
-      console.log(msg)
+      console.log.apply(console, args)
     }
   },
   time: (DEBUG, name) => {

@@ -22,6 +22,7 @@ console.log(`${db.getCollection('visits').count()} visits`)
 
 const http = require('http')
 const resMethods = require('./res-methods')
+const parseBody = require('./parse-body')
 
 const server = http.createServer()
 
@@ -37,16 +38,25 @@ const getAvg = {
 }
 
 const getCollection = {
-  url: /\/(users|visits|locations)\/(\d+|bad)/,
+  url: /\/(users|visits|locations)\/(\d+|\w+)/,
   handler: require('./get-collection')(DEBUG, db)
+}
+
+const createCollection = {
+  url: /\/(users|visits|locations)\/new/,
+  handler: require('./create-collection')(DEBUG, db)
+}
+
+const updateCollection = {
+  url: /\/(users|visits|locations)\/(\d+)/,
+  handler: require('./update-collection')(DEBUG, db)
 }
 
 server.on('request', (req, res) => {
   const { method, url } = req
+  let match
 
   if (method === 'GET') {
-    let match
-
     if (match = url.match(getVisits.url)) {
       handler = getVisits.handler
     } else if (match = url.match(getAvg.url)) {
@@ -58,17 +68,24 @@ server.on('request', (req, res) => {
     }
 
     return handler(match, req, res)
-  } else if (method === 'POST') {
-    return resMethods.sendBadRequest(req, res)
+  }
+
+  if (method === 'POST') {
+    parseBody(req, reqData => {
+      if (match = url.match(createCollection.url)) {
+        handler = createCollection.handler
+      } else if (match = url.match(updateCollection.url)) {
+        handler = updateCollection.handler
+      } else {
+        return resMethods.sendBadRequest(req, res)
+      }
+
+      return handler(match, reqData, req, res)
+    }, () => {
+      return resMethods.sendBadRequest(req, res)
+    })
   }
 })
-
-// app.get('/:collection/:id', require('./get-collection')(DEBUG, db))
-// app.get('/users/:id/visits', require('./get-visits')(DEBUG, db))
-// app.get('/locations/:id/avg', require('./get-avg')(DEBUG, db, db.getCollection('timestamp').find()[0].timestamp))
-
-// app.post('/:collection/new', bodyParser.json(), require('./post-collection')(DEBUG, db))
-// app.post('/:collection/:id', bodyParser.json(), require('./post-collection-update')(DEBUG, db))
 
 let port = 80
 if (process.argv.length === 3) {
