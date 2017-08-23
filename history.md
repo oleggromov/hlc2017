@@ -102,20 +102,40 @@
 
   From:
 
-    $ ./highloadcup_tester -addr http://127.0.0.1:3000 -hlcupdocs ~/home_projects/hlcupdocs/data/FULL/ -test -phase 1
+    $ ./start-all.sh
     bullets count: 6000
     Start test run
-    Done. 6000 queries in 1514 ms => 3963 rps
+    Done. 6000 queries in 2422 ms => 2477 rps
+    Check the answers...
+    All answers is OK
+    bullets count: 12000
+    Start test run
+    Done. 12000 queries in 38059 ms => 315 rps
+    Check the answers...
+    All answers is OK
+    bullets count: 42000
+    Start test run
+    Done. 42000 queries in 13780 ms => 3048 rps
     Check the answers...
     All answers is OK
 
   To:
 
-    $ ./highloadcup_tester -addr http://127.0.0.1:3000 -hlcupdocs ~/home_projects/hlcupdocs/data/FULL/ -test -phase 1
+    $ ./start-all.sh
     bullets count: 6000
     Start test run
-    Done. 6000 queries in 1031 ms => 5820 rps
+    Done. 6000 queries in 1286 ms => 4666 rps
+    Check the answers...
+    All answers is OK
+    bullets count: 12000
+    Start test run
+    Done. 12000 queries in 33510 ms => 358 rps
+    Check the answers...
+    All answers is OK
+    bullets count: 42000
+    Start test run
+    Done. 42000 queries in 7683 ms => 5467 rps
     Check the answers...
     All answers is OK
 
-  RPS increased almost twice!
+  RPS for reading increased almost twice!
