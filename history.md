@@ -141,3 +141,5 @@
   RPS for reading increased almost twice!
 
   According to the tables `debug/24aug-stats-express.txt` and `debug/24aug-stats-custom-server.txt`, the result sending speed has increased at least twice. Look at the `get_collection_(send|result)` and similar lines.
+
+	**Actual speed increase** is from ~1900 s to ~550.
