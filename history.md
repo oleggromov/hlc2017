@@ -143,3 +143,82 @@
   According to the tables `debug/24aug-stats-express.txt` and `debug/24aug-stats-custom-server.txt`, the result sending speed has increased at least twice. Look at the `get_collection_(send|result)` and similar lines.
 
 	**Actual speed increase** is from ~1900 s to ~550.
+
+17. Optimizing collection join
+
+  First, rewriting to the following didn't help.
+
+    function getPropMap (collection, prop) {
+      return collection.reduce((map, cur) => {
+        if (map[cur[prop]]) {
+          map[cur[prop]].push(cur)
+        } else {
+          map[cur[prop]] = [cur]
+        }
+        return map
+      }, {})
+    }
+
+    function innerJoin (left, right, leftProp, rightProp) {
+      const leftMap = getPropMap(left, leftProp)
+      const rightMap = getPropMap(right, rightProp)
+
+      let joined = []
+      for (id in leftMap) {
+        if (!rightMap[id]) {
+          continue
+        }
+
+        for (let i = 0; i < leftMap[id].length; i++) {
+          joined.push(Object.assign({}, leftMap[id][i], rightMap[id][0]))
+        }
+      }
+
+      return joined
+    }
+
+    module.exports = innerJoin
+
+  With the complexity of O(~3n) it still worked rather slow. Maybe I'm missing something or just wrong in calculating the complexity.
+
+  However, the next attempt to rewrite `innerJoin` function from:
+
+    function innerJoin (left, right, leftProp, rightProp) {
+      return left.map(leftItem => {
+        let rightItem = right.find(rightItem => rightItem[rightProp] === leftItem[leftProp])
+        if (rightItem) {
+          return Object.assign({}, leftItem, rightItem)
+        }
+      }).filter(item => Boolean(item))
+    }
+
+    module.exports = innerJoin
+
+  to:
+
+    function innerJoin (left, right, leftProp, rightProp) {
+      const rightMap = right.reduce((map, cur) => {
+        map[cur[rightProp]] = cur
+        return map
+      }, {})
+
+      return left.map(leftItem => {
+        let rightItem = rightMap[leftItem[leftProp]]
+        if (rightItem) {
+          return Object.assign({}, leftItem, rightItem)
+        }
+      }).filter(item => Boolean(item))
+    }
+
+    module.exports = innerJoin
+
+  did help! The rule of a thumb will be to get rid of inner looping, which is `right.find` in the above case.
+
+  The execution time dropped by about 5 times.
+
+           ║ key                           │ mean      │ median    │ 95p       │ 99p       │ count ║
+    Before ║ get_avg_join                  │ 0.178     │ 0.068     │ 0.654     │ 1.177     │ 3316  ║
+    After  ║ get_avg_join                  │ 0.030     │ 0.015     │ 0.122     │ 0.204     │ 3316  ║
+
+    Before ║ get_visits_join               │ 0.142     │ 0.068     │ 0.509     │ 0.845     │ 6666  ║
+    After  ║ get_visits_join               │ 0.020     │ 0.005     │ 0.083     │ 0.143     │ 6666  ║
