@@ -222,3 +222,5 @@
 
     Before ║ get_visits_join               │ 0.142     │ 0.068     │ 0.509     │ 0.845     │ 6666  ║
     After  ║ get_visits_join               │ 0.020     │ 0.005     │ 0.083     │ 0.143     │ 6666  ║
+
+  It didn't affect RPS significantly during local test launches.
