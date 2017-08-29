@@ -258,3 +258,4 @@
 
   Apparently, I have to start using streamed input. The question is, how to parse chunked JSON data and what would be the chunks actually.
 
+  I've rewritten file reading to streaming and got an app that freezes on about ~1.4 Gb allocated memory. In production (linux) environment, I suppose, it was just crashing. So the way to fix it is to add `node --max_old_space_size=4096` flag that allows node to use more memory. But the question is, why with only 1080 Mb of data node allocates about 3.5 Gb memory. Maybe I don't care about some links leaving them in memory and creating leaks.
