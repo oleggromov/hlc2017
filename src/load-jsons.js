@@ -17,6 +17,7 @@ function getDataFiles (dir) {
 function loadJsons (dir, callback) {
   const db = new loki('hlc')
   let files = getDataFiles(dir)
+  let totalSize = 0
 
   // TODO add indexes
   const collections = {
@@ -77,6 +78,7 @@ function loadJsons (dir, callback) {
     })
 
     readable.on('end', () => {
+      totalSize += readable.bytesRead
       console.log(`${filename} -> ${type}, ${getSize(readable.bytesRead)}`)
       const parsed = JSON.parse(buffer.join(''))
       callback(type, parsed)
@@ -96,6 +98,7 @@ function loadJsons (dir, callback) {
         processStreamed(files.pop(), importData, processNext)
       } else {
         console.timeEnd('read and insert data')
+        console.log(`Total size: ${getSize(totalSize)}`)
         buildIndexes()
         resolve(db)
       }

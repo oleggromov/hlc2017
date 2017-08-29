@@ -13,9 +13,9 @@ const DATA_DIR = './data'
 
 console.time('load_data_time')
 loadJsons(path.resolve(__dirname, DATA_DIR)).then(createServer)
-console.timeEnd('load_data_time')
 
 function createServer (db) {
+  console.timeEnd('load_data_time')
   console.log('Loaded:')
   console.log(`${db.getCollection('users').count()} users`)
   console.log(`${db.getCollection('locations').count()} locations`)

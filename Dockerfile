@@ -29,4 +29,4 @@ EXPOSE 80
 # Unpack data and run node
 CMD unzip /tmp/data/data.zip -d /usr/src/app/src/data \
 	&& cp /tmp/data/options.txt /usr/src/app/src/data \
-	&& NODE_ENV=production node src/index.js
+	&& NODE_ENV=production node --max_old_space_size=4096 src/index.js
