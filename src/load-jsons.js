@@ -14,9 +14,9 @@ function getDataFiles (dir) {
     .filter(isDataFile)
 }
 
-function loadJsons (dir) {
+function loadJsons (dir, callback) {
   const db = new loki('hlc')
-  const files = getDataFiles(dir)
+  let files = getDataFiles(dir)
 
   // TODO add indexes
   const collections = {
@@ -31,36 +31,78 @@ function loadJsons (dir) {
     let timestamp = str.match(/(\d+)\n/)
     if (timestamp) {
       db.getCollection('timestamp').insert({ timestamp: Number(timestamp[1]) })
-      console.log(`Found timestamp ${db.getCollection('timestamp').find()[0].timestamp}`)
+      console.log(`Timestamp: ${db.getCollection('timestamp').find()[0].timestamp}`)
     }
   }
 
+  console.log(`${files.length} data files is found`)
   console.time('read and insert data')
-  files.forEach(filename => {
-    const type = filename.match(/(\w+?)_/)[1]
-    const parsed = JSON.parse(fs.readFileSync(path.resolve(basedir, filename), 'utf8'))
 
-    if (parsed[type] && Array.isArray(parsed[type])) {
-      collections[type].insert(parsed[type])
+  const buildIndexes = () => {
+    console.time('build indexes')
+    collections['users'].ensureIndex('id', true)
+    collections['users'].ensureIndex('birth_date', true)
+    collections['users'].ensureIndex('gender', true)
+    collections['locations'].ensureIndex('id', true)
+    collections['locations'].ensureIndex('country', true)
+    collections['locations'].ensureIndex('distance', true)
+    collections['visits'].ensureIndex('id', true)
+    collections['visits'].ensureIndex('user', true)
+    collections['visits'].ensureIndex('location', true)
+    collections['visits'].ensureIndex('visited_at', true)
+    console.timeEnd('build indexes')
+  }
+
+  const getSize = (bytes) => {
+    const mb = Math.round(bytes / 1048576)
+    const kb = Math.round(bytes / 1024)
+
+    if (kb < 1) {
+      return `${bytes} bytes`
+    } else if (mb < 1) {
+      return `${kb} Kb`
     }
+
+    return `${mb} Mb`
+  }
+
+  const processStreamed = (filename, callback, next) => {
+    const type = filename.match(/(\w+?)_/)[1]
+    const filepath = path.resolve(basedir, filename)
+    const readable = fs.createReadStream(filepath, { encoding: 'utf8' })
+
+    let buffer = []
+    readable.on('data', chunk => {
+      buffer.push(chunk)
+    })
+
+    readable.on('end', () => {
+      console.log(`${filename} -> ${type}, ${getSize(readable.bytesRead)}`)
+      const parsed = JSON.parse(buffer.join(''))
+      callback(type, parsed)
+      next()
+    })
+  }
+
+  const importData = (type, data) => {
+    if (data[type] && Array.isArray(data[type])) {
+      collections[type].insert(data[type])
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    const processNext = () => {
+      if (files.length) {
+        processStreamed(files.pop(), importData, processNext)
+      } else {
+        console.timeEnd('read and insert data')
+        buildIndexes()
+        resolve(db)
+      }
+    }
+
+    processStreamed(files.pop(), importData, processNext)
   })
-
-  console.timeEnd('read and insert data')
-
-  console.time('build indexes')
-  collections['users'].ensureIndex('id', true)
-  collections['users'].ensureIndex('birth_date', true)
-  collections['users'].ensureIndex('gender', true)
-  collections['locations'].ensureIndex('id', true)
-  collections['locations'].ensureIndex('country', true)
-  collections['locations'].ensureIndex('distance', true)
-  collections['visits'].ensureIndex('id', true)
-  collections['visits'].ensureIndex('user', true)
-  collections['visits'].ensureIndex('location', true)
-  collections['visits'].ensureIndex('visited_at', true)
-  console.timeEnd('build indexes')
-
-  return db
 }
 
 module.exports = loadJsons
