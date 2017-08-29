@@ -1,5 +1,5 @@
 const isNumber = (param) => {
-  return Boolean(param) && typeof param === 'number' && !isNaN(Number(param))
+  return typeof param !== undefined && typeof param === 'number' && !isNaN(Number(param))
 }
 
 const isString = (param) => {
