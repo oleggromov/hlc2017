@@ -224,3 +224,37 @@
     After  ║ get_visits_join               │ 0.020     │ 0.005     │ 0.083     │ 0.143     │ 6666  ║
 
   It didn't affect RPS significantly during local test launches.
+
+18. With huge data files the application just dies
+
+  Part of log:
+
+    client_8256_1 |FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+    client_8256_1 |client_8256_1 |<--- Last few GCs --->
+    client_8256_1 |client_8256_1 |[9:0x3d62c00] 1179302 ms: Mark-sweep 1406.1 (1970.1) -> 1394.0 (1968.9) MB, 11111.1 / 0.0 ms allocation failure GC in old space requested
+    client_8256_1 |[9:0x3d62c00] 1190680 ms: Mark-sweep 1394.0 (1968.9) -> 1393.8 (1969.9) MB, 11377.8 / 0.0 ms allocation failure GC in old space requested
+    client_8256_1 |[9:0x3d62c00] 1202724 ms: Mark-sweep 1393.8 (1969.9) -> 1393.8 (1938.4) MB, 12044.0 / 0.0 ms last resort
+    client_8256_1 |[9:0x3d62c00] 1213806 ms: Mark-sweep 1393.8 (1938.4) -> 1393.8 (1938.4) MB, 11080.6 / 0.0 ms last resort
+    client_8256_1 |client_8256_1 |client_8256_1 |<--- JS stacktrace --->
+    client_8256_1 |client_8256_1 |==== JS stack trace =========================================
+    client_8256_1 |client_8256_1 |Security context: 0x11d2a599cef1 <JSObject>
+    client_8256_1 |2: stringSlice(aka stringSlice) [buffer.js:556] [bytecode=0x2293d0046051 offset=96](this=0x11d2a5982241 <undefined>,buf=0x156751902329 <Uint8Array map = 0x30522c143969>,encoding=0x11d2a59fdad1 <String[4]: utf8>,start=0,end=8934690)
+    client_8256_1 |4: toString [buffer.js:629] [bytecode=0x2293d0045c89 offset=148](this=0x156751902329 <Uint8Array map = 0x30522c143969>,encoding=0x11d2a59fdad1 <String[4]: utf...
+    client_8256_1 |client_8256_1 |1: node::Abort() [node]
+    client_8256_1 |2: 0x13c7b5c [node]
+    client_8256_1 |3: v8::Utils::ReportOOMFailure(char const*, bool) [node]
+    client_8256_1 |4: v8::internal::V8::FatalProcessOutOfMemory(char const*, bool) [node]
+    client_8256_1 |5: v8::internal::Factory::NewRawOneByteString(int, v8::internal::PretenureFlag) [node]
+    client_8256_1 |6: v8::internal::Factory::NewStringFromOneByte(v8::internal::Vector<unsigned char const>, v8::internal::PretenureFlag) [node]
+    client_8256_1 |7: v8::internal::Factory::NewStringFromUtf8(v8::internal::Vector<char const>, v8::internal::PretenureFlag) [node]
+    client_8256_1 |8: v8::String::NewFromUtf8(v8::Isolate*, char const*, v8::NewStringType, int) [node]
+    client_8256_1 |9: node::StringBytes::Encode(v8::Isolate*, char const*, unsigned long, node::encoding, v8::Local<v8::Value>*) [node]
+    client_8256_1 |10: 0x13e931b [node]
+    client_8256_1 |11: v8::internal::FunctionCallbackArguments::Call(void (*)(v8::FunctionCallbackInfo<v8::Value> const&)) [node]
+    client_8256_1 |12: 0xba5d81 [node]
+    client_8256_1 |13: v8::internal::Builtin_HandleApiCall(int, v8::internal::Object**, v8::internal::Isolate*) [node]
+    client_8256_1 |14: 0x450ee840dd
+    client_8256_1 |Aborted
+
+  Apparently, I have to start using streamed input. The question is, how to parse chunked JSON data and what would be the chunks actually.
+
