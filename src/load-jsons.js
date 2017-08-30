@@ -67,12 +67,14 @@ function loadJsons (dir, callback) {
     return `${mb} Mb`
   }
 
+  let buffer = []
+  let readable
+
   const processStreamed = (filename, callback, next) => {
     const type = filename.match(/(\w+?)_/)[1]
     const filepath = path.resolve(basedir, filename)
-    const readable = fs.createReadStream(filepath, { encoding: 'utf8' })
+    readable = fs.createReadStream(filepath, { encoding: 'utf8' })
 
-    let buffer = []
     readable.on('data', chunk => {
       buffer.push(chunk)
     })
@@ -81,6 +83,7 @@ function loadJsons (dir, callback) {
       totalSize += readable.bytesRead
       console.log(`${filename} -> ${type}, ${getSize(readable.bytesRead)}`)
       const parsed = JSON.parse(buffer.join(''))
+      buffer = []
       callback(type, parsed)
       next()
     })
@@ -101,6 +104,7 @@ function loadJsons (dir, callback) {
         console.log(`Total size: ${getSize(totalSize)}`)
         buildIndexes()
         resolve(db)
+        readable = null
       }
     }
 
