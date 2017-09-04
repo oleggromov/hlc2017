@@ -1,4 +1,14 @@
-# How it goes
+# What is it?
+
+This repository contains a NodeJS REST API wrapped in a docker container. It is made for the [Mail.ru Highload Cup contest](https://highloadcup.ru/) that took place in August 2017. The code has passed the first contest round handling ~2000 RPS without errors (all the responses were correct and none of them failed) but working relatively slowly. The [best result was 558 seconds](https://highloadcup.ru/solution/20385/#result) whereas the best submitted NodeJS-based solutions worked up to 10 times faster.
+
+This code wasn't capable of handling 1 Gb data instead of ~100 Mb because, at least, it didn't fit into memory available by default to Node process (~1.4Gb). Likely, it wouldn't pass the last contest stage because of the inefficient and, more importantly, uncontrollable indexing algorithms of underlying [LokiJS](https://github.com/techfort/LokiJS), an in-memory, MongoDB-like database implemented in Javascript. However, this storage helped me to build the first working version of the app.
+
+The next step would be replacing LokiJS with a made and controlled by hand in-memory data storage with custom indexing algorithms based, supposedly, on hash tables and binary search depending on the value types. I would also optimize glue and networking code, as I did when replaced express.js with raw node `http` module to handle requests. Unfortunately, I haven't had enough time to finish the solution and left it as is in order to provide anybody having interest with a source of inspiration.
+
+**Conclusion:** a well-designed NodeJS application is capable of handling at least 2k data retrieval requests working in one thread on a modern i5 like core and having about 2-4Gb of available memory.
+
+## History
 
 1. Finding base image for Docker
 
