@@ -1,6 +1,6 @@
 # What is it?
 
-This repository contains a NodeJS REST API wrapped in a docker container. It is made for the [Mail.ru Highload Cup contest](https://highloadcup.ru/) that took place in August 2017. The code has passed the first contest round handling ~2000 RPS without errors (all the responses were correct and none of them failed) but working relatively slowly. The [best result was 558 seconds](https://highloadcup.ru/solution/20385/#result) whereas the best submitted NodeJS-based solutions worked up to 10 times faster.
+This repository contains a NodeJS REST API wrapped in a docker container. It is made for the [Mail.ru Highload Cup contest](https://highloadcup.ru/) that took place in August 2017. The code has passed the first contest round handling ~2000 RPS without errors (all the responses were correct and none of them failed) but working relatively slowly. The **[best result was 558 seconds](https://highloadcup.ru/solution/20385/#result)** whereas the best submitted NodeJS-based solutions worked up to 10 times faster.
 
 This code wasn't capable of handling 1 Gb data instead of ~100 Mb because, at least, it didn't fit into memory available by default to Node process (~1.4Gb). Likely, it wouldn't pass the last contest stage because of the inefficient and, more importantly, uncontrollable indexing algorithms of underlying [LokiJS](https://github.com/techfort/LokiJS), an in-memory, MongoDB-like database implemented in Javascript. However, this storage helped me to build the first working version of the app.
 
